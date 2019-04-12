@@ -31,16 +31,20 @@ int main(){
     //Convert image to 8 bits
     imLabelClone.convertTo(imLabelClone, CV_8U);
 
+    Mat imLabelCloneColorMap;
+
     //Apply color map to images
-    applyColorMap(imLabelClone, imLabelClone, COLORMAP_JET);
+    applyColorMap(imLabelClone, imLabelCloneColorMap, COLORMAP_JET);
     
     //Create windows to display images
     namedWindow("input image", WINDOW_NORMAL);
     namedWindow("cca image", WINDOW_NORMAL);
+    namedWindow("cca image color map", WINDOW_NORMAL);
 
     //Display images
     imshow("input image", binaryImage);
     imshow("cca image", imLabelClone);
+    imshow("cca image color map", imLabelCloneColorMap);
     
     //Press esc on keyboard to exit
     waitKey(0);

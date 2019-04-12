@@ -1,25 +1,43 @@
 import cv2
 import sys
+import numpy as np
 
-image = cv2.imread("../assets/closing.jpeg")
+#Read image as grayScale over which cca is to be applied
+image = cv2.imread("../assets/cca.png", cv2.IMREAD_GRAYSCALE)
 
-#Create structuring element/kernel and select and elliptical kernel
-closingSize = 3
-element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*closingSize + 1, 2*closingSize + 1), (closingSize, closingSize))
+#get binary image
+th, binaryImage = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
 
-#Apply dilation on the image followed by erosion
-result = cv2.morphologyEx(image, cv2.MORPH_CLOSE, element)
+#Find connected components
+_, binaryImage=cv2.connectedComponents(binaryImage)
 
-#Create windows to show images
+#get clone of binary image to work on so that finally we can compare input and output images
+binaryImageClone = np.copy(binaryImage) 
+
+#Find the max and min pixel values and their locations
+(minValue, maxValue, minPosition, maxPosition) = cv2.minMaxLoc(binaryImageClone)
+
+#normalize the image so that the min value is 0 and max value is 255
+binaryImageClone = 255 * (binaryImageClone - minValue) / (maxValue - minValue)
+
+#convert image to 8bits unsigned type
+binaryImageClone = np.uint8(binaryImageClone)
+
+#Apply a color map
+binaryImageCloneColorMap = cv2.applyColorMap(binaryImageClone, cv2.COLORMAP_JET)
+
+#Create windows to display images
 cv2.namedWindow("input image", cv2.WINDOW_NORMAL)
-cv2.namedWindow("closed image", cv2.WINDOW_NORMAL)
+cv2.namedWindow("cca image", cv2.WINDOW_NORMAL)
+cv2.namedWindow("cca image color", cv2.WINDOW_NORMAL)
 
-#display images
+#Display images
 cv2.imshow("input image", image)
-cv2.imshow("closed image", result)
+cv2.imshow("cca image", binaryImageClone)
+cv2.imshow("cca image color", binaryImageCloneColorMap)
 
-#Press esc on keyboard to exit the program
+#Press esc on keybaord to exit the program
 cv2.waitKey(0)
 
-#close all the opened windows
+#Close all the opened windows
 cv2.destroyAllWindows()
